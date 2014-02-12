@@ -406,8 +406,27 @@ Example usage:
    */
   private function setPath($path)
   {
-    $this->path = $this->localizePath((string) urldecode($path));
+  	if(preg_match('/^https?:\/\//', $path))
+  	{
+	  	if( ! $image = file_get_contents($path))
+	  	{
+		  	$this->path = $this->localizePath((string) urldecode($path));
+	  	}
+	  	
+	  	$tmp = SLIRConfig::$pathToCacheDir.'/tmp';
+	  	if( ! is_dir($tmp)) mkdir($tmp);
+	  	
+	  	$tmp_file = $tmp.'/'.substr($path, strrpos($path, '/'));
 
+	  	file_put_contents($tmp_file, $image);
+	  	
+	  	$this->path = str_replace(SLIRConfig::$documentRoot, '', $tmp_file);
+  	}
+  	else
+  	{
+    	$this->path = $this->localizePath((string) urldecode($path));
+	}
+	
     if (!$this->isPathSecure()) {
       // Make sure the image path is secure
       throw new RuntimeException('Image path may not contain ":", "..", "<", or ">"');
