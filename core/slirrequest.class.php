@@ -106,6 +106,12 @@ class SLIRRequest
    * @var boolean
    */
   private $isUsingDefaultImagePath  = false;
+  
+  /**
+   * @since 2.0
+   * @var boolean
+   */
+  private $isUsingRemoteImage = false;
 
   /**
    * @since 2.0
@@ -378,7 +384,7 @@ Example usage:
    * @since 2.0
    * @return boolean
    */
-  private function isUsingQueryString()
+  public function isUsingQueryString()
   {
     if (SLIRConfig::$forceQueryString === true) {
       return true;
@@ -421,6 +427,8 @@ Example usage:
 	  	file_put_contents($tmp_file, $image);
 	  	
 	  	$this->path = str_replace(SLIRConfig::$documentRoot, '', $tmp_file);
+	  	
+	  	$this->isUsingRemoteImage = true;
   	}
   	else
   	{

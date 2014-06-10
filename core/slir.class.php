@@ -264,7 +264,7 @@ class SLIR
     }
 
     // Check the cache based on the properties of the rendered image
-    if ($this->isRenderedCached()) {
+    if ($this->shouldUseRealPathCache() === false && $this->isRenderedCached()) {
       return $this->serveRenderedCachedImage();
     }
 
@@ -441,11 +441,26 @@ class SLIR
     // The request cache can't be used if the request is falling back to the
     // default image path because it will prevent the actual image from being
     // shown if it eventually ends up on the server
-    if (SLIRConfig::$enableRequestCache === true && !$this->getRequest()->isUsingDefaultImagePath()) {
+    if ($this->shouldUseRealPathCache() === false && SLIRConfig::$enableRequestCache === true && !$this->getRequest()->isUsingDefaultImagePath()) {
       return true;
     } else {
       return false;
     }
+  }
+  
+  /**
+   * Checks to see if the real path cache should be used
+   *
+   * @since 2.0
+   * @return boolean
+   */
+  private function shouldUseRealPathCache()
+  {
+	  if ($this->getRequest()->isUsingQueryString() === false && $this->getRequest()->isUsingRemoteImage === false && SLIRConfig::$enableRealPathCache === true) {
+		  return true;
+	  }
+	  
+	  return false;
   }
 
   /**
@@ -994,6 +1009,19 @@ class SLIR
    */
   private function getRenderedCacheDir()
   {
+  	if ($this->shouldUseRealPathCache() === true) {
+  	
+  		$fullPath = SLIRConfig::$documentRoot . (string) $_SERVER['REQUEST_URI'];
+  		
+  		$directoryPath = substr($fullPath, 0, strrpos($fullPath, '/'));
+  	
+  		if( ! is_dir($directoryPath)) {
+	  		mkdir($directoryPath, 0755, true);
+  		}
+
+  		return $directoryPath;
+  	}
+    
     return SLIRConfig::$pathToCacheDir . '/rendered';
   }
 
@@ -1012,7 +1040,13 @@ class SLIR
    */
   private function renderedCacheFilename()
   {
-    return '/' . $this->getRendered()->getHash();
+  	if ($this->shouldUseRealPathCache() === true) {
+		$uri = (string) $_SERVER['REQUEST_URI'];
+		
+		return substr($uri, strrpos($uri, '/'));
+	}
+	
+	return '/' . $this->getRendered()->getHash();
   }
 
   /**

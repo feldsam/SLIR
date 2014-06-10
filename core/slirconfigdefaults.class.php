@@ -82,6 +82,14 @@ class SLIRConfigDefaults
   public static $enableRequestCache = true;
 
   /**
+   * If true, enables the fastest, real path cache. Images are cached to filesystem according to request path in url and can be served directly by fast webserver like nginx
+   *
+   * @since 2.0
+   * @var boolean
+   */
+  public static $enableRealPathCache = false;
+
+  /**
    * How much memory (in megabytes) SLIR is allowed to allocate for memory-intensive processes such as rendering and cropping.
    *
    * @since 2.0
