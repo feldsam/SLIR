@@ -1466,7 +1466,9 @@ class SLIR
   private function serveRenderedImage()
   {
     // Cache the image
-    $this->cache();
+    if ($this->shouldUseRealPathCache() === true && $this->getRequest()->isUsingDefaultImagePath() === false || $this->shouldUseRealPathCache() === false) {
+	    $this->cache();
+    }
 
     // Serve the file
     $this->serveFile(
